@@ -92,12 +92,6 @@ export class FileResolver {
             }
         });
         if(project) {
-            await Project.update({
-                id: projectId
-            }, {
-                files: [],
-                folders: []
-            })
             const sender: any = {};
             const proj_folders: Folder[] = [];
             const proj_files: File[] = [];
