@@ -1,4 +1,5 @@
 import { Arg, Field, InputType, Int, Mutation, Query, Resolver } from "type-graphql";
+import { Commit } from "../entity/Commit";
 import { Project } from "../entity/Project";
 import { User } from "../entity/User";
 @InputType()
@@ -27,6 +28,23 @@ export class ProjectResolver {
     @Query(() => [Project]!, {nullable: true})
     async allProjects() {
         return Project.find();
+    }
+    
+    @Query(() => Commit, { nullable: true }) 
+    async currentCommit(@Arg("projectId") projectId: number) {
+        const p = await Project.findOne({
+            where: {
+                id: projectId
+            }
+        })
+        if(p) {
+            if(p.commits.length == 0) return null
+            return await Commit.findOne({
+                where: {
+                    id: p.commits[p.commits.length - 1]
+                }
+            });
+        } else return null;
     }
 
     @Query(() => Project!, {nullable: true})
@@ -81,8 +99,7 @@ export class ProjectResolver {
             const project = await Project.create({
                 name: input.name,
                 issues: [],
-                folders: [],
-                files: [],
+                commits: []
             }).save()
             if(project) {
                 const user_projects = user.projects;

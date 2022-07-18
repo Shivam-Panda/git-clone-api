@@ -1,4 +1,5 @@
 import { Arg, Field, InputType, Int, Mutation, Query, Resolver } from "type-graphql";
+import { Commit } from "../entity/Commit";
 import { File } from "../entity/File";
 import { Folder } from "../entity/Folder";
 import { Project } from "../entity/Project";
@@ -25,16 +26,6 @@ export class FileResolver {
             }
         });
         if(project) {
-            for(let i = 0; i < project.files.length; i++) {
-                await File.delete({
-                    id: project.files[i]
-                })
-            };
-            for(let i = 0; i < project.folders.length; i++) {
-                await Folder.delete({
-                    id: project.folders[i]
-                })
-            };
             const project_files = [];
             const project_folder = [];
             const file_to_folder: any = {};
@@ -71,13 +62,21 @@ export class FileResolver {
                 }).save()
                 project_folder.push(f.id);
             }
+
+            const com = await Commit.create({
+                files: project_files,
+                folders: project_folder
+            }).save()
+
+            let proj_coms = project.commits;
+
+            proj_coms.push(com.id);
             
             await Project.update({
                 id: projectId
             }, {
-                files: project_files,
-                folders: project_folder
-            })
+                commits: proj_coms
+            });
             return true;
         } else {
             return null;
@@ -92,23 +91,32 @@ export class FileResolver {
             }
         });
         if(project) {
+            const coms = project.commits;
+            if(coms.length == 0) return null;
+            const cur_com_id = coms[coms.length - 1];
+            const cur_com = await Commit.findOne({
+                where: {
+                    id: cur_com_id
+                }
+            });
+            if(!cur_com) return null;
             const sender: any = {};
             const proj_folders: Folder[] = [];
             const proj_files: File[] = [];
-            for(let i = 0; i < project.files.length; i++) {
+            for(let i = 0; i < cur_com.files.length; i++) {
                 const cur_file = await File.findOne({
                     where: {
-                        id: project.files[i]
+                        id: cur_com.files[i]
                     }
                 });
                 if(cur_file) {
                     proj_files.push(cur_file)
                 }
             }
-            for(let i = 0; i < project.folders.length; i++) {
+            for(let i = 0; i < cur_com.folders.length; i++) {
                 const cur_file = await Folder.findOne({
                     where: {
-                        id: project.folders[i]
+                        id: cur_com.folders[i]
                     }
                 });
                 if(cur_file) {
@@ -171,21 +179,28 @@ export class FileResolver {
             }
         })
         if(project) {
+            if(project.commits.length == 0) return null
+            const c = await Commit.findOne({
+                where: {
+                    id: project.commits[project.commits.length - 1]
+                }
+            })
+            if(!c) return null;
             const files = [];
-            for(let i = 0; i < project.files.length; i++) {
+            for(let i = 0; i < c.files.length; i++) {
                 const cur_file = await File.findOne({
                     where: {
-                        id: project.files[i]
+                        id: c.files[i]
                     }
                 });
                 if(cur_file && cur_file.folder == input.name) {
                     files.push(cur_file.fileName);
                 }
             }
-            for(let i = 0; i < project.folders.length; i++) {
+            for(let i = 0; i < c.folders.length; i++) {
                 const cur_file = await Folder.findOne({
                     where: {
-                        id: project.folders[i]
+                        id: c.folders[i]
                     }
                 });
                 if(cur_file && cur_file.parentFolder == input.name) {
