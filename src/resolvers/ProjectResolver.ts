@@ -23,6 +23,15 @@ class CreateProjectInput {
     name: string;
 }
 
+@InputType()
+class FindCommitInput {
+    @Field(() => String, { nullable: true })
+    name?: string;
+
+    @Field(() => Int, { nullable: true })
+    id?: number;
+}
+
 @Resolver()
 export class ProjectResolver {
     @Query(() => [Project]!, {nullable: true})
@@ -45,6 +54,61 @@ export class ProjectResolver {
                 }
             });
         } else return null;
+    }
+
+    @Query(() => [String], { nullable: true })
+    async getAllCommits(@Arg("projectId") projectId: number) {
+        const project = await Project.findOne({
+            where: {
+                id: projectId
+            }
+        })
+        if(project) {
+            const ret_strings: string[] = []
+            for(let i = 0; i < project.commits.length; i++) {
+                const c = await Commit.findOne({
+                    where: {
+                        id: project.commits[i]
+                    }
+                })
+                if(c) {
+                    ret_strings.push(c.name);
+                }
+            }
+            return ret_strings;
+        } else {
+            return null;
+        }
+    }
+
+    @Query(() => Commit, { nullable: true })
+    async getCommit(@Arg("projectId") projectId: number, @Arg("input") input: FindCommitInput) {
+        const project = await Project.findOne({
+            where: {
+                id: projectId
+            }
+        });
+        if(project) {
+            if(input.id) {
+                return await Commit.findOne({
+                    where: {
+                        id: input.id,
+                        projectId
+                    }
+                });
+            } else if(input.name) {
+                return await Commit.findOne({
+                    where: {
+                        name: input.name,
+                        projectId
+                    }
+                });
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     @Query(() => Project!, {nullable: true})

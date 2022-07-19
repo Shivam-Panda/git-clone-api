@@ -15,4 +15,12 @@ export class Commit extends BaseEntity {
     @Field(() => [Int])
     @Column("simple-array")
     folders: number[]
+
+    @Field(() => String)
+    @Column()
+    name: string;
+
+    @Field(() => Int)
+    @Column("int")
+    projectId: number;
 }

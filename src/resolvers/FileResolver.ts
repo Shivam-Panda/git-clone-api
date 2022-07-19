@@ -19,13 +19,23 @@ class GetFileInput {
 @Resolver()
 export class FileResolver {
     @Mutation(() => Boolean, { nullable: true })
-    async commit(@Arg("input") input: string, @Arg("projectId") projectId: number) {
+    async commit(@Arg("input") input: string, @Arg("projectId") projectId: number, @Arg("name") name: string) {
         const project = await Project.findOne({
             where: {
                 id: projectId
             }
         });
         if(project) {
+            for(let i = 0; i < project.commits.length; i++) {
+                const c = await Commit.findOne({
+                    where: {
+                        id: project.commits[i]
+                    }
+                });
+                if(c && c.name == name) {
+                    return null;
+                }
+            }
             const project_files = [];
             const project_folder = [];
             const file_to_folder: any = {};
@@ -65,7 +75,9 @@ export class FileResolver {
 
             const com = await Commit.create({
                 files: project_files,
-                folders: project_folder
+                folders: project_folder, 
+                name, 
+                projectId: project.id
             }).save()
 
             let proj_coms = project.commits;
