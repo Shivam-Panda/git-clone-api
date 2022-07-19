@@ -96,21 +96,30 @@ export class FileResolver {
     }
 
     @Query(() => String, {nullable: true})
-    async pullRequest(@Arg('projectId') projectId: number) {
+    async pullRequest(@Arg('projectId') projectId: number, @Arg("name", { nullable: true }) name: string) {
         const project = await Project.findOne({
             where: {
                 id: projectId
             }
         });
         if(project) {
-            const coms = project.commits;
-            if(coms.length == 0) return null;
-            const cur_com_id = coms[coms.length - 1];
-            const cur_com = await Commit.findOne({
-                where: {
-                    id: cur_com_id
-                }
-            });
+            let cur_com: Commit | null;
+            if(project.commits.length == 0) return null;
+            if(name) {
+                cur_com = await Commit.findOne({
+                    where: {
+                        name,
+                        projectId
+                    }
+                });
+            } else {
+                cur_com = await Commit.findOne({
+                    where: {
+                        id: project.commits[project.commits.length - 1],
+                        projectId
+                    }
+                });
+            };
             if(!cur_com) return null;
             const sender: any = {};
             const proj_folders: Folder[] = [];
