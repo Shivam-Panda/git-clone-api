@@ -3,24 +3,20 @@ import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @ObjectType()
 @Entity()
-export class Commit extends BaseEntity {
+export class Todo extends BaseEntity {
     @Field(() => Int)
     @PrimaryGeneratedColumn()
     id: number;
+    
+    @Field(() => [Int])
+    @Column("simple-array")
+    todo: number[];
 
     @Field(() => [Int])
     @Column("simple-array")
-    files: number[]
+    current: number[];
 
     @Field(() => [Int])
     @Column("simple-array")
-    folders: number[]
-
-    @Field(() => String, { nullable: true })
-    @Column({ nullable: true })
-    name: string;
-
-    @Field(() => Int, { nullable: true })
-    @Column("int", { nullable: true })
-    projectId: number;
+    done: number[];
 }

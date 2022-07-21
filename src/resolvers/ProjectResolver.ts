@@ -1,6 +1,7 @@
 import { Arg, Field, InputType, Int, Mutation, Query, Resolver } from "type-graphql";
 import { Commit } from "../entity/Commit";
 import { Project } from "../entity/Project";
+import { Todo } from "../entity/Todo";
 import { User } from "../entity/User";
 @InputType()
 class FindProjectInput {
@@ -160,10 +161,16 @@ export class ProjectResolver {
             if(projects_made.length > 0) {
                 return null;
             }
+            const t = await Todo.create({
+                todo: [],
+                current: [],
+                done: []
+            }).save()
             const project = await Project.create({
                 name: input.name,
                 issues: [],
-                commits: []
+                commits: [],
+                todo: t.id
             }).save()
             if(project) {
                 const user_projects = user.projects;

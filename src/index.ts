@@ -7,6 +7,7 @@ import { FileResolver } from './resolvers/FileResolver';
 import { HouseKeepingResolver } from './resolvers/HouseKeeping';
 import { IssueResolver } from './resolvers/IssueResolver';
 import { ProjectResolver } from './resolvers/ProjectResolver';
+import { TodoResolver } from './resolvers/TodoResolver';
 import { UserResolver } from './resolvers/UserResolver';
 
 (async () => {
@@ -18,7 +19,7 @@ import { UserResolver } from './resolvers/UserResolver';
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, ProjectResolver, HouseKeepingResolver, IssueResolver, FileResolver]
+      resolvers: [UserResolver, ProjectResolver, HouseKeepingResolver, IssueResolver, FileResolver, TodoResolver]
     }),
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
     context: ({ req, res }) => ({ req, res })
