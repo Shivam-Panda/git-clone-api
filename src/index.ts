@@ -10,6 +10,9 @@ import { ProjectResolver } from './resolvers/ProjectResolver';
 import { TodoResolver } from './resolvers/TodoResolver';
 import { UserResolver } from './resolvers/UserResolver';
 
+const cors = require('cors');
+
+
 (async () => {
   const app = express();
   
@@ -22,12 +25,14 @@ import { UserResolver } from './resolvers/UserResolver';
       resolvers: [UserResolver, ProjectResolver, HouseKeepingResolver, IssueResolver, FileResolver, TodoResolver]
     }),
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
-    context: ({ req, res }) => ({ req, res })
+    context: ({ req, res }) => ({ req, res }),
   });
 
   await apolloServer.start()
 
   apolloServer.applyMiddleware({ app, cors: false });
+
+  app.use(cors());
 
   app.listen(port );
 })();``
