@@ -170,7 +170,8 @@ export class ProjectResolver {
                 name: input.name,
                 issues: [],
                 commits: [],
-                todo: t.id
+                todo: t.id,
+                collaborators: [user.key]
             }).save()
             if(project) {
                 const user_projects = user.projects;
@@ -184,6 +185,36 @@ export class ProjectResolver {
             } else {
                 return null;
             }
+        } else {
+            return null;
+        }
+    }
+
+    @Mutation(() => Boolean, { nullable: true })
+    async shareProject(@Arg("projectId") projectId: number, @Arg("userId") userId: number) {
+        const user = await User.findOne({
+            where: {
+                id: userId
+            }
+        });
+        const project = await Project.findOne({
+            where: {
+                id: projectId
+            }
+        })
+
+        if(project && user) {
+            await User.update({
+                id: userId
+            }, {
+                projects: [...user.projects, project.id]
+            })
+            await Project.update({
+                id: projectId
+            }, {
+                collaborators: [...project.collaborators, user.key]
+            })
+            return true;
         } else {
             return null;
         }

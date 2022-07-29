@@ -19,13 +19,13 @@ class GetFileInput {
 @Resolver()
 export class FileResolver {
     @Mutation(() => Boolean, { nullable: true })
-    async commit(@Arg("input") input: string, @Arg("projectId") projectId: number, @Arg("name") name: string) {
+    async commit(@Arg("input") input: string, @Arg("projectId") projectId: number, @Arg("name") name: string, @Arg("key") key: string) {
         const project = await Project.findOne({
             where: {
                 id: projectId
             }
         });
-        if(project) {
+        if(project && project.collaborators.includes(key)) {
             for(let i = 0; i < project.commits.length; i++) {
                 const c = await Commit.findOne({
                     where: {

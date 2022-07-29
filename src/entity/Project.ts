@@ -23,4 +23,8 @@ export class Project extends BaseEntity {
     @Field(() => Int, { nullable: true })
     @Column("int", {nullable: true})
     todo?: number | null;
+
+    @Field(() => [String])
+    @Column("simple-array")
+    collaborators: string[];
 }
