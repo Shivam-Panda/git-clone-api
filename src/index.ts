@@ -30,7 +30,7 @@ const cors = require('cors');
 
   await apolloServer.start()
 
-  apolloServer.applyMiddleware({ app, cors: false });
+  apolloServer.applyMiddleware({ app });
 
   app.use(cors());
 
