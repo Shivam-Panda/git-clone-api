@@ -227,4 +227,30 @@ export class ProjectResolver {
         });
         return true;
     }
+
+    @Query(() => [Project]!)
+    async userProjects(
+        @Arg("key", () => String) key: string
+    ) {
+        const user = await User.findOne({
+            where: {
+                key
+            }
+        });
+        if(user) {
+            const projects = await user.projects;
+            const ps = [];
+            for(let i = 0; i< projects.length; i++) {
+                const p = await Project.findOne({
+                    where: {
+                        id: projects[i]
+                    }
+                });
+                ps.push(p)
+            }
+            return ps;
+        } else {
+            return null;
+        }
+    }
 }
