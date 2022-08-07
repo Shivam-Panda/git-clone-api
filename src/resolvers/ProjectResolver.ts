@@ -228,7 +228,7 @@ export class ProjectResolver {
         return true;
     }
 
-    @Query(() => [Project]!)
+    @Query(() => [Project]!, { nullable: true })
     async userProjects(
         @Arg("key", () => String) key: string
     ) {
